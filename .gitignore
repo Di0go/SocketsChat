@@ -1,6 +1,4 @@
 #project folde
 .idea
-#compiler target executables for debug
-CMakeLists.txt
 #actual debug
 cmake-build-debug

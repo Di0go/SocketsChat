@@ -1,9 +1,8 @@
 #include <cstdio>
 #include <unistd.h>
 #include <sys/socket.h>
-#include <netdb.h> //for later use, trust me
 #include <arpa/inet.h>
-#include <string>
+#include <thread>
 
 using namespace std;
 
@@ -11,7 +10,7 @@ int main()
 {
     //vars
     const char *ip = "127.0.0.1";
-    int port = 46000;
+    int port = 56000;
 
     //client socket
     int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
