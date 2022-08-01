@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include <vector>
 
-//this struct defines all the components needed about a user (more to be added when needed)
+//this struct defines all the attributes in an user (more to be added when needed)
 struct User 
 {
   const char *userName;
@@ -15,34 +15,48 @@ struct User
   sockaddr_in userAddress;
 };
 
+//mutex lock
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+
 //this function is called everytime a new client joins
 void *newConnection(void* user)
 {
-    //cast from void pointer to user pointer
-    auto *newUser = (User *)user;
+    //cast from void pointer user reference
+    auto & newUser = *(User *)user;
 
     //rcv buffer
     char buf[1024];
 
     while (true)
     {
-        memset(buf, 0, 1024);
+        memset(buf, 0, sizeof buf);
 
         // waiting for the client to send anything
-        int bytesReceived = recv(newUser->userSocket, buf, sizeof buf, 0);
+        int bytesReceived = recv(newUser.userSocket, buf, sizeof buf, 0);
+
+        //put other threads on hold
+        pthread_mutex_lock(&lock);
+
         if (bytesReceived <= 0)
         {
-            printf("\nClient disconnected!");
+            printf("Client disconnected!\n");
             fflush(stdout);
-            return 0;
+            break;
         }
         else 
         {
             //print buffer
             write(1, buf, bytesReceived);
-            fflush(stdout); //!
+
+            //allow next thread to resume 
+            pthread_mutex_unlock(&lock);
         }
     }
+    //allow next thread to resume 
+    pthread_mutex_unlock(&lock);
+
+    close(newUser.userSocket);
+    return 0;
 }
 
 //main method (constantly listening)
@@ -65,7 +79,6 @@ int main()
     if (bindStatus < 0) 
     {
         printf("\nCould not bind!");
-        fflush(stdout);
     };
 
 
@@ -87,10 +100,10 @@ int main()
         if (clientSocket < 0) 
         {
             printf("\nClient failed to connect!");
-            fflush(stdout); 
+            //fflush(stdout); 
         }
 
-        printf("\nNew client arrived!");
+        printf("\nNew connection from %s\n", inet_ntoa(client.sin_addr));
         fflush(stdout);
 
         //creates the user and adds it to the vector
@@ -100,8 +113,6 @@ int main()
         pthread_t socketThread;
         threads.push_back(socketThread);
         pthread_create(&threads.back(), NULL, *newConnection, &users.back());
-
-        //detatches the thread
         pthread_detach(threads.back());
     }
 

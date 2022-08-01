@@ -45,7 +45,7 @@ int main()
         int bytesSent = read(STDIN_FILENO, input, sizeof input);
 
         //send the input over the socket
-        int sendOver = send(clientSocket, input, bytesSent, 0);
+        int sendOver = send(clientSocket, input, sizeof input, 0);
         if (sendOver < 0)
         {
             printf("\nCouldn't send message :(");
