@@ -1,10 +1,9 @@
 #include <cstdio>
+#include <cstring>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <thread>
-
-using namespace std;
 
 int main()
 {
@@ -25,22 +24,25 @@ int main()
     int connection = connect(clientSocket, (sockaddr*)&clientStruct, sizeof(clientStruct));
     if (connection < 0)
     {
-        printf("Couldn't connect :(");
+        printf("\nCouldn't connect :(");
         return -1;
     }
 
     //receive buffer
     char buff[1024];
     //input string
-    char *input;
+    char *input[1024];
 
     //send loop
     while (true)
     {
+        //clears the buffers
+        memset(&input, 0, sizeof input);
+
         //receive and store user input
-        printf("» ");
+        printf("\n» ");
         fflush(stdout);
-        int bytesSent = read(STDIN_FILENO, input, sizeof buff);
+        int bytesSent = read(STDIN_FILENO, input, sizeof input);
 
         //send the input over the socket
         int sendOver = send(clientSocket, input, bytesSent, 0);

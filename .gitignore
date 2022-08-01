@@ -1,4 +1,4 @@
-#project folde
-.idea
-#actual debug
+#debug and binaries
 cmake-build-debug
+Server/server
+Client/client
